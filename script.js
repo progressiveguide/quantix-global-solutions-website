@@ -1,11 +1,63 @@
 document.addEventListener('DOMContentLoaded', () => {
   const menu = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
+  const iconNodes = document.querySelectorAll('.fa-solid');
+
+  iconNodes.forEach((icon) => {
+    icon.setAttribute('aria-hidden', 'true');
+  });
+
+  document.querySelectorAll('.card').forEach((card) => {
+    if (!card.querySelector('.icon-badge')) {
+      card.classList.add('card-with-marker');
+    }
+  });
+
+  if (iconNodes.length > 0) {
+    const iconProbe = document.createElement('i');
+    iconProbe.className = 'fa-solid fa-circle-check';
+    iconProbe.style.position = 'absolute';
+    iconProbe.style.visibility = 'hidden';
+    document.body.append(iconProbe);
+    const iconContent = window.getComputedStyle(iconProbe, '::before').content;
+    iconProbe.remove();
+
+    if (!iconContent || iconContent === 'none' || iconContent === 'normal' || iconContent === '""') {
+      document.body.classList.add('icons-fallback');
+    }
+  }
 
   if (menu && navLinks) {
+    navLinks.setAttribute('aria-label', 'Primary');
+    if (!navLinks.id) {
+      navLinks.id = 'site-navigation';
+    }
+    menu.setAttribute('aria-controls', navLinks.id);
+
+    const closeMenu = () => {
+      navLinks.classList.remove('open');
+      menu.setAttribute('aria-expanded', 'false');
+    };
+
     menu.addEventListener('click', () => {
       const isOpen = navLinks.classList.toggle('open');
       menu.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    navLinks.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target) && !navLinks.contains(event.target)) {
+        closeMenu();
+      }
     });
   }
 
